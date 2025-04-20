@@ -7,32 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique @map("session_token")
-  expires      DateTime
-  user_id      String
-  User         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@index([user_id], map: "sessions_user_id_fkey")
-  @@map("sessions")
-}
-
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@unique([identifier, token])
-  @@map("verification_tokens")
-}
-
 model Appointment {
   appointment_id     String               @id
   purpose            String               @db.VarChar(255)
   location           String               @db.VarChar(100)
   appointment_date   DateTime             @db.DateTime(0)
   case_id            String
+  status             String?              @db.VarChar(40)
   Cases              Cases                @relation(fields: [case_id], references: [case_id], onDelete: Cascade, map: "fk_appointment_case")
   Appointment_Client Appointment_Client[]
   Appointment_Staff  Appointment_Staff[]
@@ -96,6 +77,7 @@ model Client {
   name               String               @db.VarChar(100)
   address            String               @db.VarChar(255)
   phone_no           String               @db.VarChar(20)
+  status             String?              @db.VarChar(40)
   Appointment_Client Appointment_Client[]
   Billing            Billing[]
   client_auth        User                 @relation(fields: [client_id], references: [id], onDelete: Cascade, map: "fk_client_auth")
@@ -144,6 +126,7 @@ model Staff {
   s_role            String              @db.VarChar(50)
   designation       String?             @db.VarChar(50)
   image             String?             @db.VarChar(512)
+  status            String?             @db.VarChar(40)
   Appointment_Staff Appointment_Staff[]
   Expense           Expense[]
   staff_auth        User                @relation(fields: [staff_id], references: [id], onDelete: Cascade, map: "fk_staffauth_staff")
@@ -169,7 +152,6 @@ model User {
   role           User_role
   Client         Client?
   Staff          Staff?
-  sessions       Session[]
 }
 
 enum User_role {
